@@ -35,6 +35,7 @@ fi
 )
 
 "$ROOT_DIR/scripts/render-upstream-env.sh"
+python3 "$ROOT_DIR/scripts/patch-atomcms-dockerfile.py"
 "$ROOT_DIR/scripts/patch-nitro-config.py"
 "$ROOT_DIR/scripts/render-sql.py"
 

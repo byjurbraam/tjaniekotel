@@ -1,0 +1,23 @@
+-- Rendered copy: generated/public-settings.sql
+-- Import this after the Arcturus and CMS base databases exist.
+-- Review before running.
+
+-- Arcturus emulator settings
+UPDATE emulator_settings SET `value`='*.${ROOT_DOMAIN}' WHERE `key`='websockets.whitelist';
+UPDATE emulator_settings SET `value`='${PUBLIC_SCHEME}://${DOMAIN_ASSETS}/usercontent/camera/' WHERE `key`='camera.url';
+UPDATE emulator_settings SET `value`='/app/assets/usercontent/camera/' WHERE `key`='imager.location.output.camera';
+UPDATE emulator_settings SET `value`='/app/assets/usercontent/camera/thumbnail/' WHERE `key`='imager.location.output.thumbnail';
+UPDATE emulator_settings SET `value`='${PUBLIC_SCHEME}://${DOMAIN_ASSETS}/api/imageproxy/0x0/http://img.youtube.com/vi/%video%/default.jpg' WHERE `key`='imager.url.youtube';
+UPDATE emulator_settings SET `value`='0' WHERE `key`='console.mode';
+UPDATE emulator_settings SET `value`='/app/assets/usercontent/badgeparts/generated/' WHERE `key`='imager.location.output.badges';
+UPDATE emulator_settings SET `value`='/app/assets/swf/c_images/Badgeparts' WHERE `key`='imager.location.badgeparts';
+
+-- AtomCMS website settings
+UPDATE website_settings SET `value`='${PUBLIC_SCHEME}://${DOMAIN_ASSETS}/api/imager/?figure=' WHERE `key`='avatar_imager';
+UPDATE website_settings SET `value`='${PUBLIC_SCHEME}://${DOMAIN_ASSETS}/swf/c_images/album1584' WHERE `key`='badges_path';
+UPDATE website_settings SET `value`='${PUBLIC_SCHEME}://${DOMAIN_ASSETS}/usercontent/badgeparts/generated' WHERE `key`='group_badge_path';
+UPDATE website_settings SET `value`='${PUBLIC_SCHEME}://${DOMAIN_ASSETS}/swf/dcr/hof_furni' WHERE `key`='furniture_icons_path';
+UPDATE website_settings SET `value`='/housekeeping' WHERE `key`='housekeeping_url';
+UPDATE website_settings SET `value`='arcturus' WHERE `key`='rcon_ip';
+UPDATE website_settings SET `value`='3001' WHERE `key`='rcon_port';
+UPDATE website_settings SET `value`='0' WHERE `key`='cloudflare_turnstile_enabled';

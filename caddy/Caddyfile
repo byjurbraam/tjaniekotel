@@ -1,0 +1,38 @@
+{
+    email {$ACME_EMAIL}
+}
+
+{$DOMAIN_GAME} {
+    encode zstd gzip
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        -Server
+    }
+    reverse_proxy nitro:80
+}
+
+{$DOMAIN_ASSETS} {
+    encode zstd gzip
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        -Server
+    }
+    reverse_proxy assets:80
+}
+
+{$DOMAIN_CMS} {
+    encode zstd gzip
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        -Server
+    }
+    reverse_proxy cms:8080
+}
+
+{$DOMAIN_WS} {
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        -Server
+    }
+    reverse_proxy arcturus:2096
+}

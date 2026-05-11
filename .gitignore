@@ -1,0 +1,12 @@
+.env
+vendor/
+generated/*.sql
+!generated/.gitkeep
+*.zip
+*.tar
+*.tar.gz
+.DS_Store
+.idea/
+.vscode/
+__pycache__/
+*.pyc

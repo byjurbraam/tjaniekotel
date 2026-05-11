@@ -17,6 +17,7 @@ UPDATE website_settings SET `value`='${PUBLIC_SCHEME}://${DOMAIN_ASSETS}/api/ima
 UPDATE website_settings SET `value`='${PUBLIC_SCHEME}://${DOMAIN_ASSETS}/swf/c_images/album1584' WHERE `key`='badges_path';
 UPDATE website_settings SET `value`='${PUBLIC_SCHEME}://${DOMAIN_ASSETS}/usercontent/badgeparts/generated' WHERE `key`='group_badge_path';
 UPDATE website_settings SET `value`='${PUBLIC_SCHEME}://${DOMAIN_ASSETS}/swf/dcr/hof_furni' WHERE `key`='furniture_icons_path';
+UPDATE website_settings SET `value`='${PUBLIC_SCHEME}://${DOMAIN_GAME}' WHERE `key`='nitro_path';
 UPDATE website_settings SET `value`='/housekeeping' WHERE `key`='housekeeping_url';
 UPDATE website_settings SET `value`='arcturus' WHERE `key`='rcon_ip';
 UPDATE website_settings SET `value`='3001' WHERE `key`='rcon_port';

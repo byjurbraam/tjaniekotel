@@ -5,6 +5,7 @@ generated/*.sql
 *.zip
 *.tar
 *.tar.gz
+*.pem
 .DS_Store
 .idea/
 .vscode/

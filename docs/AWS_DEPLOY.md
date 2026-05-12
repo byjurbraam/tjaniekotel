@@ -31,6 +31,7 @@ VPS_SSH_KEY_PATH=C:\tjanoekhotel\.deploy_ssh_key.pem
 VPS_PROJECT_DIR=/opt/tjanoekhotel
 AWS_ACCESS_KEY_ID=AKIARXIT6B7LHPIR6YGD
 SERVER_COMPOSE_FILE=compose.server.yml
+GIT_BRANCH=main
 ```
 
 Do not commit `.env.deploy` or any `.pem` key.
@@ -112,6 +113,15 @@ Sync compose/env files, pull the pushed images on the VPS, and restart:
 ```
 
 `up` uses:
+
+```bash
+git fetch --prune origin
+git pull --ff-only origin main
+```
+
+when `VPS_PROJECT_DIR` is a Git checkout. If the server directory is not a Git checkout yet, the script falls back to syncing only the deploy files.
+
+Then it runs:
 
 ```bash
 sudo docker compose --env-file .env -f compose.server.yml pull

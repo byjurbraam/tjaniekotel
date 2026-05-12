@@ -33,6 +33,7 @@ foreach ($Required in 'VPS_HOST', 'VPS_USER', 'VPS_SSH_KEY_PATH') {
 
 $ProjectDir = if ($Config['VPS_PROJECT_DIR']) { $Config['VPS_PROJECT_DIR'] } else { '/opt/tjanoekhotel' }
 $ServerComposeFile = if ($Config['SERVER_COMPOSE_FILE']) { $Config['SERVER_COMPOSE_FILE'] } else { 'compose.server.yml' }
+$GitBranch = if ($Config['GIT_BRANCH']) { $Config['GIT_BRANCH'] } else { 'main' }
 $SshKey = $Config['VPS_SSH_KEY_PATH']
 
 if (-not (Test-Path -LiteralPath $SshKey)) {
@@ -107,6 +108,21 @@ function Sync-DeployFiles {
     Invoke-Server "cd '$ProjectDir' && chmod +x scripts/*.sh scripts/*.py"
 }
 
+function Test-ServerGitCheckout {
+    & $Ssh @SshOptions $Target "test -d '$ProjectDir/.git'"
+    return $LASTEXITCODE -eq 0
+}
+
+function Refresh-ServerSource {
+    if (Test-ServerGitCheckout) {
+        Invoke-Server "cd '$ProjectDir' && git fetch --prune origin && git pull --ff-only origin '$GitBranch'"
+        return
+    }
+
+    Write-Host "Server path is not a Git checkout yet; syncing deploy files instead."
+    Sync-DeployFiles
+}
+
 function Invoke-LocalCompose {
     param([Parameter(Mandatory)][string[]] $Arguments)
 
@@ -145,11 +161,11 @@ switch ($Action) {
         Invoke-LocalCompose @('push')
     }
     'pull' {
-        Sync-DeployFiles
+        Refresh-ServerSource
         Invoke-ServerCompose 'pull'
     }
     'up' {
-        Sync-DeployFiles
+        Refresh-ServerSource
         Invoke-ServerCompose 'pull'
         Invoke-ServerCompose 'up -d --remove-orphans'
     }

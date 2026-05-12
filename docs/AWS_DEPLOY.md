@@ -1,12 +1,14 @@
 # AWS VPS deploy notes
 
-Use this when deploying or debugging the AWS server. The intended production flow is:
+Use this when deploying or debugging the AWS server. The production flow is:
 
 1. Build Docker images on a build machine.
 2. Push those images to the registry.
 3. SSH to the VPS and run `docker compose pull` + `docker compose up`.
 
 That keeps Node, npm, pnpm, Composer, Gradle, app packages, Nitro config, and runtime assets out of the VPS host. The server only needs Docker, `.env`, `.cms.env`, the compose file, and persistent database/storage volumes for normal deploys.
+
+Do not build application images on the VPS for normal deploys. If GHCR or another registry rejects a push/pull, fix registry authentication or permissions before deploying.
 
 References: Docker Compose tags images from `image:` during builds, can push them to a registry, and can later pull those images with `docker compose pull`.
 
@@ -29,7 +31,7 @@ VPS_HOST=3.71.5.101
 VPS_USER=ec2-user
 VPS_SSH_KEY_PATH=C:\tjanoekhotel\.deploy_ssh_key.pem
 VPS_PROJECT_DIR=/opt/tjanoekhotel
-AWS_ACCESS_KEY_ID=AKIARXIT6B7LHPIR6YGD
+AWS_ACCESS_KEY_ID=your-access-key-id
 SERVER_COMPOSE_FILE=compose.server.yml
 GIT_BRANCH=main
 ```
@@ -50,16 +52,10 @@ Open an SSH shell:
 .\scripts\aws-deploy.ps1 ssh
 ```
 
-If SSH key permissions fail, use the strict local key copy:
+If SSH key permissions fail, use the strict local key path configured in `.env.deploy`:
 
 ```txt
 C:\tjanoekhotel\.deploy_ssh_key.pem
-```
-
-The original AWS key is:
-
-```txt
-C:\tjanoekhotel\amz_private_key.pem
 ```
 
 ## Server setup already done
@@ -97,6 +93,8 @@ Build and push the production images:
 .\scripts\aws-deploy.ps1 build-push
 ```
 
+`compose.registry-build.yml` is not a production runtime compose file. It exists only to build and push the tagged images from the local build machine or CI.
+
 The registry build includes:
 
 - `arcturus`: emulator plus `/app/assets`
@@ -104,15 +102,16 @@ The registry build includes:
 - `assets`: nginx asset server plus bundled runtime assets
 - `imager`: compiled Nitro imager plus `/app/assets`
 - `cms`: compiled AtomCMS app
+- `proxy`: nginx reverse proxy with the project route template
 
-Sync compose/env files, pull the pushed images on the VPS, and restart:
+Pull the pushed images on the VPS and restart:
 
 ```powershell
 .\scripts\aws-deploy.ps1 up
 .\scripts\aws-deploy.ps1 status
 ```
 
-`up` uses:
+`up` updates the server checkout first:
 
 ```bash
 git fetch --prune origin
@@ -132,19 +131,13 @@ It does not build on the VPS.
 
 ## First-time/bootstrap fallback
 
-Only use this if the server is missing `vendor/nitro-docker` configs/assets:
+Only use this if the server is missing initial config files:
 
 ```powershell
 .\scripts\aws-deploy.ps1 bootstrap
 ```
 
-Only use this if you deliberately want the old server-side build flow:
-
-```powershell
-.\scripts\aws-deploy.ps1 legacy-up
-```
-
-`legacy-up` is slower and builds on the VPS. It is a fallback, not the normal production deploy.
+There is no normal server-side build command. Build and push images from the build machine, then pull them on the VPS.
 
 ## Mijndomein DNS
 
@@ -168,7 +161,7 @@ With `compose.server.yml`, keep these AWS security group ports open:
 443  HTTPS
 ```
 
-The public web routes are handled by Caddy:
+The public web routes are handled by the nginx `proxy` image:
 
 ```txt
 tjaniekahotel.nl          CMS

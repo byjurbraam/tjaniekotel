@@ -16,7 +16,9 @@ RUN pnpm exec nx build frontend
 FROM nginx:alpine
 
 COPY --from=builder /build/dist/apps/frontend/ /usr/share/nginx/html/
-COPY nitro/nginx.conf /etc/nginx/conf.d/default.conf
-COPY nitro/renderer-config.json /usr/share/nginx/html/renderer-config.json
-COPY nitro/ui-config.json /usr/share/nginx/html/ui-config.json
-COPY nitro/favicon.ico /usr/share/nginx/html/favicon.ico
+COPY vendor/nitro-docker/nitro/nginx.conf /etc/nginx/conf.d/default.conf
+COPY vendor/nitro-docker/nitro/renderer-config.json /usr/share/nginx/html/renderer-config.json
+COPY vendor/nitro-docker/nitro/ui-config.json /usr/share/nginx/html/ui-config.json
+COPY branding/favicon.ico /usr/share/nginx/html/favicon.ico
+COPY docker/nitro-entrypoint.d/ /docker-entrypoint.d/
+RUN chmod +x /docker-entrypoint.d/*.sh

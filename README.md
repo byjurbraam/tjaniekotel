@@ -6,9 +6,9 @@ This scaffold is designed for a VPS or server where you want a repeatable Docker
 
 ## What is included
 
-- `compose.local.yml` for local or first-time testing.
-- `compose.registry-build.yml` for building production images.
-- `compose.server.yml` for public deployment behind Caddy with prebuilt images.
+- `compose.local.yml` for local development builds.
+- `compose.registry-build.yml` only for building and pushing registry images from the build machine or CI.
+- `compose.server.yml` for public deployment with prebuilt images pulled by the VPS.
 - Scripts to pull the upstream open-source stack into `vendor/nitro-docker`.
 - Environment rendering for the upstream `.env` and `.cms.env` files.
 - A SQL settings template for public domain settings.

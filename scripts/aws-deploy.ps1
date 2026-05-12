@@ -1,5 +1,5 @@
 param(
-    [ValidateSet('ssh', 'sync', 'status', 'bootstrap', 'build', 'push', 'build-push', 'pull', 'up', 'logs', 'legacy-up')]
+    [ValidateSet('ssh', 'sync', 'status', 'bootstrap', 'build', 'push', 'build-push', 'pull', 'up', 'logs')]
     [string] $Action = 'status'
 )
 
@@ -65,15 +65,27 @@ function Copy-ToServer {
 }
 
 function Sync-DeployFiles {
-    Invoke-Server "mkdir -p '$ProjectDir/scripts' '$ProjectDir/caddy'"
+    Invoke-Server "mkdir -p '$ProjectDir/scripts' '$ProjectDir/docker/nginx' '$ProjectDir/branding'"
     Invoke-Server "mkdir -p '$ProjectDir/db/dumps'"
 
     foreach ($File in @(
         '.env',
+        'AGENTS.md',
+        '.dockerignore',
         'compose.server.yml',
         'compose.registry-build.yml',
         'compose.local.yml',
-        'caddy/Caddyfile',
+        'docker/arcturus.Dockerfile',
+        'docker/assets.Dockerfile',
+        'docker/cms.Dockerfile',
+        'docker/imager.Dockerfile',
+        'docker/nitro.Dockerfile',
+        'docker/proxy.Dockerfile',
+        'docker/nginx/default.conf.template',
+        'docker/nitro-entrypoint.d/10-render-runtime-config.sh',
+        'branding/tjaniekotel-logo.png',
+        'branding/tjaniekotel-logo.webp',
+        'branding/favicon.ico',
         'scripts/bootstrap-upstream.sh',
         'scripts/disable-paid-shop.php',
         'scripts/patch-atomcms-dockerfile.py',
@@ -171,9 +183,5 @@ switch ($Action) {
     }
     'logs' {
         Invoke-ServerCompose 'logs --tail=160'
-    }
-    'legacy-up' {
-        Sync-DeployFiles
-        Invoke-Server "cd '$ProjectDir' && ./scripts/bootstrap-upstream.sh && sudo docker compose --env-file .env -f compose.local.yml up -d --build"
     }
 }

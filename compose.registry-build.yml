@@ -10,8 +10,8 @@ services:
   nitro:
     image: ${IMAGE_REPOSITORY:?Set IMAGE_REPOSITORY}/${IMAGE_NAME_PREFIX:-tjanoekhotel}-nitro:${IMAGE_TAG:-latest}
     build:
-      context: ./vendor/nitro-docker
-      dockerfile: ../../docker/nitro.Dockerfile
+      context: .
+      dockerfile: docker/nitro.Dockerfile
 
   assets:
     image: ${IMAGE_REPOSITORY:?Set IMAGE_REPOSITORY}/${IMAGE_NAME_PREFIX:-tjanoekhotel}-assets:${IMAGE_TAG:-latest}
@@ -29,3 +29,10 @@ services:
     image: ${IMAGE_REPOSITORY:?Set IMAGE_REPOSITORY}/${IMAGE_NAME_PREFIX:-tjanoekhotel}-cms:${IMAGE_TAG:-latest}
     build:
       context: ./vendor/nitro-docker/atomcms
+      dockerfile: ../../../docker/cms.Dockerfile
+
+  proxy:
+    image: ${IMAGE_REPOSITORY:?Set IMAGE_REPOSITORY}/${IMAGE_NAME_PREFIX:-tjanoekhotel}-proxy:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: docker/proxy.Dockerfile

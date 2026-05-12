@@ -11,6 +11,8 @@ RUN mvn install
 WORKDIR /build/arcturus-ws
 RUN git clone --recurse-submodules https://git.mc8051.de/nitro/nitrowebsockets-for-ms.git .
 RUN sed -i 's#<version>3.0.0</version>#<version>[1.0.0,)</version>#g' pom.xml
+RUN sed -i 's#register("websockets.whitelist", "localhost")#register("websockets.whitelist", "*")#' src/main/java/org/krews/plugin/nitro/main.java \
+    && grep -F 'register("websockets.whitelist", "*")' src/main/java/org/krews/plugin/nitro/main.java
 RUN mvn package
 RUN cp target/NitroWebsockets-*.jar target/websockets.jar
 

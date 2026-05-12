@@ -75,6 +75,7 @@ function Sync-DeployFiles {
         'compose.local.yml',
         'caddy/Caddyfile',
         'scripts/bootstrap-upstream.sh',
+        'scripts/disable-paid-shop.php',
         'scripts/patch-atomcms-dockerfile.py',
         'scripts/patch-nitro-config.py',
         'scripts/patch-pnpm-dockerfiles.py',

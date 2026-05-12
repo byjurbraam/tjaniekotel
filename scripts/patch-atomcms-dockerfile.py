@@ -7,6 +7,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCKERFILE = ROOT / "vendor" / "nitro-docker" / "atomcms" / "Dockerfile"
 BRANDING_SOURCE = ROOT / "branding"
 BRANDING_DESTINATION = ROOT / "vendor" / "nitro-docker" / "atomcms" / "branding"
+PATCH_SOURCE = ROOT / "scripts" / "disable-paid-shop.php"
+PATCH_DESTINATION = ROOT / "vendor" / "nitro-docker" / "atomcms" / "docker-patches"
 BRANDING_FILES = (
     "tjaniekotel-logo.webp",
     "tjaniekotel-logo.png",
@@ -55,6 +57,15 @@ COPY --chown=www-data:www-data ./branding/tjaniekotel-logo.png /var/www/html/pub
 COPY --chown=www-data:www-data ./branding/favicon.ico /var/www/html/public/favicon.ico
 '''.lstrip("\n")
 
+COMMERCE_MARKER = "Real-money shop removal."
+COMMERCE_NEEDLE = "RUN git checkout $COMMIT\n"
+COMMERCE_PATCH = r'''
+
+# Real-money shop removal.
+COPY ./docker-patches/disable-paid-shop.php /tmp/disable-paid-shop.php
+RUN php /tmp/disable-paid-shop.php /app
+'''.lstrip("\n")
+
 
 def sync_branding_files() -> None:
     missing = [name for name in BRANDING_FILES if not (BRANDING_SOURCE / name).exists()]
@@ -66,11 +77,20 @@ def sync_branding_files() -> None:
         shutil.copy2(BRANDING_SOURCE / name, BRANDING_DESTINATION / name)
 
 
+def sync_patch_files() -> None:
+    if not PATCH_SOURCE.exists():
+        raise SystemExit(f"Missing commerce patch script: {PATCH_SOURCE}")
+
+    PATCH_DESTINATION.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(PATCH_SOURCE, PATCH_DESTINATION / PATCH_SOURCE.name)
+
+
 def main() -> None:
     if not DOCKERFILE.exists():
         raise SystemExit(f"Missing {DOCKERFILE}")
 
     sync_branding_files()
+    sync_patch_files()
     contents = DOCKERFILE.read_text(encoding="utf-8")
     changed = False
 
@@ -88,6 +108,13 @@ def main() -> None:
         contents = contents.replace(BRANDING_NEEDLE, BRANDING_NEEDLE + BRANDING_PATCH)
         changed = True
 
+    if COMMERCE_MARKER not in contents:
+        if COMMERCE_NEEDLE not in contents:
+            raise SystemExit(f"Could not find commerce patch insertion point in {DOCKERFILE}")
+
+        contents = contents.replace(COMMERCE_NEEDLE, COMMERCE_NEEDLE + COMMERCE_PATCH)
+        changed = True
+
     if changed:
         DOCKERFILE.write_text(contents, encoding="utf-8")
         print("Patched AtomCMS Dockerfile.")
@@ -95,6 +122,7 @@ def main() -> None:
         print("AtomCMS Dockerfile already patched.")
 
     print("Synced AtomCMS branding assets.")
+    print("Synced AtomCMS commerce removal patch.")
 
 
 if __name__ == "__main__":

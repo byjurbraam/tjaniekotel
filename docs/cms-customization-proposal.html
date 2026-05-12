@@ -6,19 +6,20 @@
   <title>Tjaniekotel CMS Customization Proposal</title>
   <style>
     :root {
-      --page: #313338;
-      --surface: #383a40;
-      --surface-2: #41434a;
-      --surface-3: #2b2d31;
-      --line: #4f525b;
-      --text: #f2f3f5;
-      --muted: #b5bac1;
-      --soft: #8f949e;
-      --pink: #ff4f84;
-      --violet: #8b7cff;
-      --blue: #5865f2;
-      --green: #23a559;
-      --gold: #f0b232;
+      --bg: #222733;
+      --top: #111722;
+      --subtop: #1b2230;
+      --panel: #111827;
+      --panel-2: #182031;
+      --panel-3: #20283a;
+      --line: rgba(255,255,255,.06);
+      --text: #ffffff;
+      --muted: #b8c0d2;
+      --soft: #8f9aaf;
+      --yellow: #f6bd0b;
+      --green: #15ad5d;
+      --purple: #d443c4;
+      --cyan: #7de7ff;
     }
 
     * {
@@ -30,433 +31,404 @@
       min-height: 100vh;
       color: var(--text);
       font-family: Inter, Arial, sans-serif;
-      background:
-        radial-gradient(circle at 18% 0%, rgba(139,124,255,.22), transparent 34%),
-        radial-gradient(circle at 86% 12%, rgba(255,79,132,.18), transparent 30%),
-        var(--page);
+      background: var(--bg);
     }
 
-    .site-header {
-      height: 76px;
+    .topbar {
+      height: 60px;
+      background: var(--top);
+    }
+
+    .topbar-inner {
+      width: 910px;
+      margin: 0 auto;
+      height: 60px;
       display: flex;
       align-items: center;
-      gap: 26px;
-      padding: 0 42px;
-      background: rgba(43,45,49,.96);
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      position: sticky;
-      top: 0;
-      z-index: 2;
+      gap: 34px;
     }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 210px;
-    }
-
-    .brand-mark {
-      width: 42px;
-      height: 42px;
-      border-radius: 10px;
+    .logo {
+      width: 58px;
+      height: 58px;
       object-fit: contain;
-      background: #1e1f22;
-      box-shadow: 0 10px 24px rgba(0,0,0,.26);
+      margin-right: auto;
     }
 
-    .brand-name {
-      font-size: 22px;
-      font-weight: 900;
-      letter-spacing: 0;
-    }
-
-    .nav {
+    .nav-item {
+      height: 60px;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 18px;
-      color: var(--muted);
+      justify-content: center;
+      gap: 3px;
+      color: white;
+      font-size: 11px;
       font-weight: 800;
-      font-size: 14px;
-    }
-
-    .nav a {
-      color: inherit;
       text-decoration: none;
-      padding: 10px 12px;
-      border-radius: 7px;
     }
 
-    .nav a.active,
-    .nav a:hover {
-      color: var(--text);
-      background: rgba(255,255,255,.08);
+    .nav-item .ico {
+      width: 34px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 22px;
     }
 
-    .header-actions {
-      margin-left: auto;
+    .nav-item.active {
+      color: #c68cff;
+    }
+
+    .subbar {
+      height: 28px;
+      background: var(--subtop);
+      border-bottom: 1px solid rgba(255,255,255,.04);
+    }
+
+    .subbar-inner {
+      width: 910px;
+      margin: 0 auto;
+      height: 28px;
       display: flex;
       align-items: center;
       gap: 10px;
-    }
-
-    .search {
-      width: 250px;
-      height: 38px;
-      display: flex;
-      align-items: center;
-      padding: 0 14px;
-      border-radius: 8px;
-      color: var(--soft);
-      background: #1e1f22;
-      border: 1px solid rgba(255,255,255,.08);
-      font-size: 13px;
-    }
-
-    .layout {
-      width: min(1180px, calc(100vw - 48px));
-      margin: 0 auto;
-      padding: 30px 0 52px;
-    }
-
-    .hero {
-      min-height: 350px;
-      display: grid;
-      grid-template-columns: minmax(0, 1.05fr) minmax(360px, .95fr);
-      gap: 24px;
-      align-items: stretch;
-    }
-
-    .hero-copy {
-      padding: 34px;
-      border-radius: 10px;
-      background: rgba(56,58,64,.94);
-      border: 1px solid var(--line);
-      box-shadow: 0 18px 44px rgba(0,0,0,.24);
-    }
-
-    h1 {
-      margin: 0 0 14px;
-      max-width: 650px;
-      font-size: 54px;
-      line-height: 1;
-      letter-spacing: 0;
-    }
-
-    .lead {
-      margin: 0 0 26px;
-      max-width: 600px;
-      color: var(--muted);
-      font-size: 18px;
-      line-height: 1.5;
-    }
-
-    .actions {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .button {
-      height: 44px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 18px;
-      border: 0;
-      border-radius: 7px;
-      background: var(--blue);
       color: white;
-      font-weight: 900;
-    }
-
-    .button.secondary {
-      background: #4e5058;
-    }
-
-    .hotel-art {
-      position: relative;
-      min-height: 350px;
-      border-radius: 10px;
-      overflow: hidden;
-      border: 1px solid var(--line);
-      background:
-        linear-gradient(180deg, rgba(88,101,242,.24), transparent 42%),
-        #3e4149;
-      box-shadow: 0 18px 44px rgba(0,0,0,.24);
-    }
-
-    .window {
-      position: absolute;
-      left: 42px;
-      top: 38px;
-      width: 94px;
-      height: 78px;
-      background: #9ed4f0;
-      border: 5px solid #25272d;
-      box-shadow: 134px 0 0 #9ed4f0, 134px 0 0 5px #25272d;
-    }
-
-    .reception {
-      position: absolute;
-      left: 54px;
-      bottom: 96px;
-      width: 230px;
-      height: 84px;
-      background: var(--pink);
-      border: 4px solid #8f2e4c;
-      box-shadow: inset 0 -16px 0 rgba(0,0,0,.16);
-    }
-
-    .reception::before {
-      content: "";
-      position: absolute;
-      left: 24px;
-      top: 20px;
-      width: 54px;
-      height: 40px;
-      border-radius: 5px;
-      background: #ffe0e9;
-      border: 3px solid #8f2e4c;
-    }
-
-    .plant {
-      position: absolute;
-      right: 62px;
-      bottom: 105px;
-      width: 72px;
-      height: 72px;
-      border-radius: 999px 999px 20px 20px;
-      background: var(--green);
-      border: 4px solid #167044;
-    }
-
-    .plant::after {
-      content: "";
-      position: absolute;
-      left: 13px;
-      bottom: -42px;
-      width: 40px;
-      height: 46px;
-      background: var(--gold);
-      border: 4px solid #9e7220;
-    }
-
-    .floor {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 112px;
-      background:
-        linear-gradient(45deg, #8c6f50 25%, transparent 25%),
-        linear-gradient(-45deg, #8c6f50 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, #8c6f50 75%),
-        linear-gradient(-45deg, transparent 75%, #8c6f50 75%);
-      background-color: #a98c66;
-      background-size: 34px 34px;
-      background-position: 0 0, 0 17px, 17px -17px, -17px 0;
-      border-top: 5px solid #6f573f;
-    }
-
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin: 30px 0 14px;
-    }
-
-    .section-header h2 {
-      margin: 0;
-      font-size: 22px;
-    }
-
-    .section-header span {
-      color: var(--muted);
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 700;
     }
 
-    .content-grid {
+    .page-bg {
+      min-height: calc(100vh - 88px);
+      background:
+        linear-gradient(180deg, rgba(34,39,51,.2), var(--bg) 360px),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='250' viewBox='0 0 900 250'%3E%3Crect width='900' height='250' fill='%23323a49'/%3E%3Cg opacity='.32'%3E%3Crect x='58' y='60' width='86' height='130' fill='%23232a36'/%3E%3Crect x='170' y='86' width='80' height='100' fill='%23404a58'/%3E%3Crect x='600' y='48' width='92' height='150' fill='%233b4656'/%3E%3Crect x='740' y='70' width='70' height='120' fill='%23262e3c'/%3E%3Ccircle cx='322' cy='100' r='64' fill='%2326372e'/%3E%3Ccircle cx='400' cy='88' r='52' fill='%2326372e'/%3E%3C/g%3E%3C/svg%3E") top center / cover no-repeat;
+    }
+
+    .content {
+      width: 850px;
+      margin: 0 auto;
       display: grid;
-      grid-template-columns: 1fr 1fr 300px;
-      gap: 16px;
-      align-items: start;
+      grid-template-columns: 566px 278px;
+      gap: 12px;
+      padding-top: 74px;
     }
 
-    .card {
-      min-height: 172px;
-      padding: 20px;
-      border-radius: 9px;
-      background: var(--surface);
-      border: 1px solid var(--line);
+    .hero {
+      position: relative;
+      min-height: 220px;
+      border-radius: 6px;
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, rgba(17,24,39,.95), rgba(17,24,39,.70)),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='220' viewBox='0 0 600 220'%3E%3Crect width='600' height='220' fill='%23273140'/%3E%3Ccircle cx='110' cy='74' r='62' fill='%232d4f49'/%3E%3Crect x='40' y='110' width='120' height='72' fill='%23182130'/%3E%3Crect x='58' y='124' width='32' height='48' fill='%23f0ad72'/%3E%3Crect x='292' y='80' width='180' height='112' fill='%23202938'/%3E%3C/svg%3E") center / cover;
     }
 
-    .card h3 {
-      margin: 0 0 10px;
-      font-size: 18px;
-    }
-
-    .card p {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.48;
-      font-size: 14px;
-    }
-
-    .meta {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      margin-top: 18px;
-      color: var(--soft);
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .online-card {
-      grid-row: span 2;
-      padding: 18px;
-      border-radius: 9px;
-      background: var(--surface-3);
-      border: 1px solid var(--line);
-    }
-
-    .online-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
-      font-weight: 900;
-    }
-
-    .pill {
-      padding: 3px 8px;
-      border-radius: 999px;
-      background: var(--green);
-      color: white;
-      font-size: 12px;
-    }
-
-    .user {
-      min-height: 42px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--muted);
-      font-weight: 800;
+    .avatar-ring {
+      position: absolute;
+      left: 54px;
+      bottom: 22px;
+      width: 104px;
+      height: 104px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(0,0,0,.45);
+      border: 3px solid rgba(255,255,255,.08);
     }
 
     .avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--pink), var(--violet));
-      position: relative;
-      flex: 0 0 auto;
+      width: 74px;
+      height: 88px;
+      border-radius: 38px 38px 28px 28px;
+      background:
+        radial-gradient(circle at 50% 24%, #f3c08b 0 21px, transparent 22px),
+        linear-gradient(#111 0 28px, transparent 29px),
+        linear-gradient(#f3c08b 0 40px, #e9e9e9 41px 88px);
+      border: 2px solid rgba(255,255,255,.18);
     }
 
-    .avatar::after {
-      content: "";
+    .hero-text {
       position: absolute;
-      right: -1px;
-      bottom: -1px;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--green);
-      border: 3px solid var(--surface-3);
+      left: 172px;
+      top: 78px;
     }
 
-    .rank {
-      margin-left: auto;
-      padding: 2px 6px;
-      border-radius: 4px;
+    .hero-text h1 {
+      margin: 0 0 5px;
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .hero-text p {
+      margin: 0;
+      font-size: 13px;
+      font-style: italic;
+    }
+
+    .enter-button {
+      position: absolute;
+      right: 32px;
+      top: 74px;
+      width: 170px;
+      height: 30px;
+      border-radius: 3px;
+      border: 0;
+      background: var(--yellow);
       color: white;
-      background: var(--pink);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .wallet {
+      position: absolute;
+      left: 162px;
+      right: 0;
+      bottom: 0;
+      height: 55px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding-left: 8px;
+      background: rgba(11,17,29,.78);
+      color: white;
+      font-size: 13px;
+    }
+
+    .currency {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .coin {
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.75);
       font-size: 11px;
       font-weight: 900;
+    }
+
+    .coin.credits { background: var(--yellow); color: #5b3d00; }
+    .coin.duckets { background: var(--purple); }
+    .coin.diamonds { background: var(--cyan); color: #0b5263; }
+
+    .news-card {
+      min-height: 220px;
+      border-radius: 6px;
+      display: flex;
+      align-items: flex-end;
+      padding: 18px 18px 14px;
+      background:
+        linear-gradient(180deg, rgba(17,24,39,.12), rgba(17,24,39,.94)),
+        url("../branding/tjaniekotel-logo.webp") center 32px / 122px 122px no-repeat,
+        var(--panel);
+      overflow: hidden;
+    }
+
+    .news-card h2 {
+      margin: 0 0 12px;
+      font-size: 16px;
+    }
+
+    .news-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: white;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .author {
+      padding: 5px 8px;
+      border-radius: 4px;
+      background: rgba(0,0,0,.55);
+    }
+
+    .friend-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 32px;
+      margin: 12px 0 10px;
+      padding: 0 12px;
+      border-radius: 4px 4px 4px 0;
+      background: var(--yellow);
+      color: white;
+      font-size: 12px;
+      font-weight: 900;
+      position: relative;
+    }
+
+    .friend-tab::after {
+      content: "";
+      position: absolute;
+      right: -10px;
+      top: 0;
+      border-left: 10px solid var(--yellow);
+      border-top: 16px solid transparent;
+      border-bottom: 16px solid transparent;
+    }
+
+    .ref-card {
+      grid-column: 1 / 2;
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+    }
+
+    .ref-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 50px;
+      padding: 0 14px;
+      background: rgba(255,255,255,.02);
+      font-size: 13px;
+    }
+
+    .ref-head strong {
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .ref-head span {
+      color: white;
+      font-size: 11px;
+    }
+
+    .ref-body {
+      padding: 14px;
+      color: white;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .copy-row {
+      display: grid;
+      grid-template-columns: 1fr 86px;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .copy-field {
+      height: 30px;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      border-radius: 3px;
+      background: #0f1724;
+      color: white;
+      font-size: 12px;
+    }
+
+    .copy-button {
+      border: 0;
+      border-radius: 3px;
+      background: var(--green);
+      color: white;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .ref-note {
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 8px;
+      border-radius: 3px;
+      background: #0b111d;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .footer {
+      height: 54px;
+      margin-top: 260px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #7890ac;
+      background: #0d1625;
+      font-size: 12px;
     }
   </style>
 </head>
 <body>
-  <header class="site-header">
-    <div class="brand">
-      <img class="brand-mark" src="../branding/tjaniekotel-logo.webp" alt="Tjaniekotel logo">
-      <div class="brand-name">Tjaniekotel</div>
-    </div>
-    <nav class="nav">
-      <a class="active" href="#">Home</a>
-      <a href="#">Enter Hotel</a>
-      <a href="#">News</a>
-      <a href="#">Community</a>
-      <a href="#">Rare Values</a>
-      <a href="#">Shop</a>
-    </nav>
-    <div class="header-actions">
-      <div class="search">Search Tjaniekotel</div>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <img class="logo" src="../branding/tjaniekotel-logo.webp" alt="Tjaniekotel">
+      <a class="nav-item" href="#"><span class="ico">●</span>Community</a>
+      <a class="nav-item" href="#"><span class="ico">▰</span>Leaderboards</a>
+      <a class="nav-item" href="#"><span class="ico">▧</span>News</a>
+      <a class="nav-item active" href="#"><span class="ico">⚿</span>Home Pagina</a>
     </div>
   </header>
 
-  <main class="layout">
-    <section class="hero">
-      <div class="hero-copy">
-        <h1>Welkom bij Tjaniekotel</h1>
-        <p class="lead">A darker Tjaniekotel homepage using your community colors: compact, modern, and lively, while keeping the existing CMS content, pages, users, articles, profiles, settings, and hotel data intact.</p>
-        <div class="actions">
-          <button class="button">Enter Hotel</button>
-          <button class="button secondary">Create Account</button>
-          <button class="button secondary">Latest News</button>
-        </div>
-      </div>
-      <div class="hotel-art" aria-label="Tjaniekotel hotel lobby preview">
-        <div class="window"></div>
-        <div class="reception"></div>
-        <div class="plant"></div>
-        <div class="floor"></div>
-      </div>
-    </section>
-
-    <div class="section-header">
-      <h2>Hotel Dashboard</h2>
-      <span>Existing CMS data, restyled only</span>
+  <div class="subbar">
+    <div class="subbar-inner">
+      <span>🇳🇱</span>
+      <span>Discord</span>
     </div>
+  </div>
 
-    <section class="content-grid">
-      <article class="card">
-        <h3>Latest News</h3>
-        <p>Existing CMS articles remain untouched, displayed as darker cards with author, date, thumbnail, and reactions.</p>
-        <div class="meta">By jurros · Today · 3 reactions</div>
-      </article>
-
-      <article class="card">
-        <h3>Hotel Overview</h3>
-        <p>Show the hotel entrance, online count, featured rooms, and quick links without changing any game data.</p>
-        <div class="meta">Client ready · Public rooms available</div>
-      </article>
-
-      <aside class="online-card">
-        <div class="online-top">
-          <span>Online Users</span>
-          <span class="pill">3 online</span>
+  <main class="page-bg">
+    <section class="content">
+      <article class="hero">
+        <div class="avatar-ring"><div class="avatar"></div></div>
+        <div class="hero-text">
+          <h1>Hey jurros!</h1>
+          <p>Tjaniekotel</p>
         </div>
-        <div class="user"><span class="avatar"></span> jurros <span class="rank">ADM</span></div>
-        <div class="user"><span class="avatar"></span> Jack</div>
-        <div class="user"><span class="avatar"></span> Marije</div>
-      </aside>
-
-      <article class="card">
-        <h3>Rare Values</h3>
-        <p>Rare values, shop, badges, and catalogue-related pages stay in the existing navigation, only visually refreshed.</p>
-        <div class="meta">Updated by staff</div>
+        <button class="enter-button">Ga naar Tjaniekotel</button>
+        <div class="wallet">
+          <span class="currency"><span class="coin credits">C</span> 0 Credits</span>
+          <span class="currency"><span class="coin duckets">D</span> 0 Duckets</span>
+          <span class="currency"><span class="coin diamonds">◆</span> 0 Diamanten</span>
+        </div>
       </article>
 
-      <article class="card">
-        <h3>Profile & Settings</h3>
-        <p>Login, registration, user profiles, comments, referrals, guestbooks, and settings remain connected to the current database.</p>
-        <div class="meta">No data migration required</div>
+      <article class="news-card">
+        <div>
+          <h2>Welkom bij Tjaniekotel</h2>
+          <div class="news-meta">
+            <span class="author">jurros</span>
+            <span>Read more</span>
+          </div>
+        </div>
+      </article>
+
+      <div>
+        <div class="friend-tab">👥 Online Vrienden</div>
+      </div>
+
+      <article class="ref-card">
+        <div class="ref-head">
+          <span>🏨</span>
+          <div>
+            <strong>Gebruikers Referenties (0/5)</strong>
+            <span>Verwijs nieuwe gebruikers en word beloond met in-game goederen.</span>
+          </div>
+        </div>
+        <div class="ref-body">
+          Bij Tjaniekotel hebben we een verwijzingssysteem toegevoegd waarmee je een bonus kunt krijgen voor elke 5 gebruikers die zich aanmelden via jouw verwijzingslink.
+          <div class="copy-row">
+            <div class="copy-field">http://3.71.5.101/register/</div>
+            <button class="copy-button">Kopieer code</button>
+          </div>
+          <div class="ref-note">U moet meer gebruikers doorverwijzen voordat u uw beloning kunt claimen.</div>
+        </div>
       </article>
     </section>
+    <footer class="footer">© 2026 Tjaniekotel is a not for profit educational project & is in no way affiliated with Sulake Corporation Oy.</footer>
   </main>
 </body>
 </html>

@@ -8,11 +8,11 @@ case "$MODE" in
   local)
     docker compose --env-file .env -f compose.local.yml logs -f "$@"
     ;;
-  caddy|prod|production)
-    docker compose --env-file .env -f compose.prod.caddy.yml logs -f "$@"
+  server|prod|production)
+    docker compose --env-file .env -f compose.server.yml logs -f "$@"
     ;;
   *)
-    echo "Usage: $0 [local|caddy] [service...]"
+    echo "Usage: $0 [local|server] [service...]"
     exit 2
     ;;
 esac

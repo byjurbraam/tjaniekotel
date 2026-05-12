@@ -2,7 +2,7 @@
 
 ## Network exposure
 
-The Caddy production compose file exposes only:
+The server compose file exposes only the Caddy proxy ports:
 
 - `80/tcp`
 - `443/tcp`
@@ -28,7 +28,7 @@ Never commit `.env`, database dumps, or asset packs to GitHub.
 
 ## WebSocket
 
-For the Caddy setup, configure the Nitro client to use:
+For the server setup, configure the Nitro client to use:
 
 ```text
 wss://$DOMAIN_WS
@@ -59,7 +59,7 @@ Use `127.0.0.1:3310` only for local maintenance over SSH tunneling. Do not bind 
 Create a manual backup:
 
 ```bash
-./scripts/backup-now.sh caddy
+./scripts/backup-now.sh server
 ```
 
 Check files under:

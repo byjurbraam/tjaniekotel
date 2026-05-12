@@ -7,11 +7,11 @@ case "$MODE" in
   local)
     docker compose --env-file .env -f compose.local.yml exec backup backup-now
     ;;
-  caddy|prod|production)
-    docker compose --env-file .env -f compose.prod.caddy.yml exec backup backup-now
+  server|prod|production)
+    docker compose --env-file .env -f compose.server.yml exec backup backup-now
     ;;
   *)
-    echo "Usage: $0 [local|caddy]"
+    echo "Usage: $0 [local|server]"
     exit 2
     ;;
 esac

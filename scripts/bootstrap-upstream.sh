@@ -47,5 +47,5 @@ Next steps:
   1. Review vendor/nitro-docker/README.md for the upstream database/assets setup.
   2. Import the base SQL and required SQL updates.
   3. Review generated/public-settings.sql and import it after the base database exists.
-  4. Start with ./scripts/up-local.sh or ./scripts/up-caddy.sh.
+  4. Start with ./scripts/up-local.sh or ./scripts/up-server.sh.
 MSG

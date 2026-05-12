@@ -7,7 +7,8 @@ This scaffold is designed for a VPS or server where you want a repeatable Docker
 ## What is included
 
 - `compose.local.yml` for local or first-time testing.
-- `compose.prod.caddy.yml` for public deployment behind Caddy with HTTPS.
+- `compose.registry-build.yml` for building production images.
+- `compose.server.yml` for public deployment behind Caddy with prebuilt images.
 - Scripts to pull the upstream open-source stack into `vendor/nitro-docker`.
 - Environment rendering for the upstream `.env` and `.cms.env` files.
 - A SQL settings template for public domain settings.
@@ -71,10 +72,10 @@ Local ports:
 | WebSocket | `ws://SERVER_IP:2096` |
 | MySQL | `127.0.0.1:3310` only |
 
-For public deployment with Caddy HTTPS:
+For public deployment with Caddy HTTPS using prebuilt images:
 
 ```bash
-./scripts/up-caddy.sh
+./scripts/up-server.sh
 ```
 
 Public domains from `.env`:
@@ -118,7 +119,7 @@ Import it after the base database exists.
 
 ## Public deployment security notes
 
-The production Caddy compose file exposes only ports `80` and `443` from the VPS. MySQL and RCON are kept internal. Do not expose MySQL, RCON, or default SSO/admin flows publicly.
+The server compose file exposes only the public proxy ports `80` and `443` from the VPS. MySQL and RCON are kept internal. Do not expose MySQL, RCON, or default SSO/admin flows publicly.
 
 Minimum checklist before going online:
 
@@ -144,10 +145,10 @@ By default, `vendor/` is ignored so you push only this scaffold, not a cloned co
 
 ```bash
 ./scripts/logs.sh local
-./scripts/logs.sh caddy
-./scripts/backup-now.sh caddy
+./scripts/logs.sh server
+./scripts/backup-now.sh server
 ./scripts/down.sh local
-./scripts/down.sh caddy
+./scripts/down.sh server
 ```
 
 ## Folder layout
@@ -156,7 +157,8 @@ By default, `vendor/` is ignored so you push only this scaffold, not a cloned co
 .
 ├── caddy/Caddyfile
 ├── compose.local.yml
-├── compose.prod.caddy.yml
+├── compose.registry-build.yml
+├── compose.server.yml
 ├── docs/
 ├── scripts/
 ├── sql/public-settings.sql.template

@@ -73,7 +73,6 @@ function Sync-DeployFiles {
         'compose.server.yml',
         'compose.registry-build.yml',
         'compose.local.yml',
-        'compose.prod.caddy.yml',
         'caddy/Caddyfile',
         'scripts/bootstrap-upstream.sh',
         'scripts/patch-atomcms-dockerfile.py',

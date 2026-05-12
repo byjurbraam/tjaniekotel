@@ -33,6 +33,7 @@ foreach ($Required in 'VPS_HOST', 'VPS_USER', 'VPS_SSH_KEY_PATH') {
 
 $ProjectDir = if ($Config['VPS_PROJECT_DIR']) { $Config['VPS_PROJECT_DIR'] } else { '/opt/tjanoekhotel' }
 $ServerComposeFile = if ($Config['SERVER_COMPOSE_FILE']) { $Config['SERVER_COMPOSE_FILE'] } else { 'compose.server.yml' }
+$GitBranch = if ($Config['GIT_BRANCH']) { $Config['GIT_BRANCH'] } else { 'main' }
 $SshKey = $Config['VPS_SSH_KEY_PATH']
 
 if (-not (Test-Path -LiteralPath $SshKey)) {
@@ -63,13 +64,10 @@ function Copy-ToServer {
     & $Scp @SshOptions $LocalPath "${Target}:${RemotePath}"
 }
 
-function Sync-RuntimeFiles {
+function Sync-IgnoredRuntimeFiles {
     Invoke-Server "mkdir -p '$ProjectDir/db/dumps'"
 
-    foreach ($File in @(
-        '.env',
-        'compose.server.yml'
-    )) {
+    foreach ($File in @('.env')) {
         $Local = Join-Path $Root $File
         if (-not (Test-Path -LiteralPath $Local)) {
             throw "Cannot sync missing file: $Local"
@@ -94,6 +92,21 @@ function Sync-RuntimeFiles {
     }
 }
 
+function Update-ServerGitCheckout {
+    $Command = @"
+set -eu
+cd '$ProjectDir'
+if [ ! -d .git ]; then
+    echo 'ERROR: VPS project directory is not a Git checkout. Clone the repo there once, keep .env/.cms.env ignored, then rerun deploy.' >&2
+    exit 2
+fi
+git fetch --prune origin
+git pull --ff-only origin '$GitBranch'
+"@
+
+    Invoke-Server $Command
+}
+
 function Invoke-LocalCompose {
     param([Parameter(Mandatory)][string[]] $Arguments)
 
@@ -111,7 +124,8 @@ switch ($Action) {
         & $Ssh @SshOptions $Target
     }
     'sync' {
-        Sync-RuntimeFiles
+        Update-ServerGitCheckout
+        Sync-IgnoredRuntimeFiles
     }
     'status' {
         Invoke-ServerCompose 'ps'
@@ -128,11 +142,13 @@ switch ($Action) {
         Invoke-LocalCompose @('push')
     }
     'pull' {
-        Sync-RuntimeFiles
+        Update-ServerGitCheckout
+        Sync-IgnoredRuntimeFiles
         Invoke-ServerCompose 'pull'
     }
     'up' {
-        Sync-RuntimeFiles
+        Update-ServerGitCheckout
+        Sync-IgnoredRuntimeFiles
         Invoke-ServerCompose 'pull'
         Invoke-ServerCompose 'up -d --remove-orphans'
     }

@@ -6,7 +6,7 @@ Use this when deploying or debugging the AWS server. The production flow is:
 2. Push those images to the registry.
 3. SSH to the VPS and run `docker compose pull` + `docker compose up`.
 
-That keeps Node, npm, pnpm, Composer, Gradle, app packages, Nitro config, and runtime assets out of the VPS host. The server only needs Docker, `compose.server.yml`, `.env`, `.cms.env`, optional init SQL files, and persistent database/storage volumes for normal deploys.
+That keeps Node, npm, pnpm, Composer, Gradle, app packages, Nitro config, and runtime assets out of the VPS host. The server only needs Docker, a Git checkout for production runtime files such as `compose.server.yml`, `.env`, `.cms.env`, optional init SQL files, and persistent database/storage volumes for normal deploys.
 
 Do not build application images on the VPS for normal deploys. If GHCR or another registry rejects a push/pull, fix registry authentication or permissions before deploying.
 
@@ -62,7 +62,9 @@ C:\tjanoekhotel\.deploy_ssh_key.pem
 
 The AWS host is Amazon Linux 2023. Docker and Docker Compose v2 were installed on the host so containers can run.
 
-Git, Python, Node, Composer, and app build tools are not needed for normal production deploys. The VPS is not required to be a Git checkout.
+Git is used only to pull production runtime files such as `compose.server.yml`. Python, Node, Composer, and app build tools are not needed for normal production deploys.
+
+Because the repository is private, the VPS needs Git read access configured once, for example with a deploy key or another GitHub credential that can only read this repository.
 
 Node packages are installed inside Dockerfiles only:
 
@@ -104,17 +106,23 @@ The registry build includes:
 - `cms`: compiled AtomCMS app
 - `proxy`: nginx reverse proxy with the project route template
 
-Sync only the runtime deploy files, pull the pushed images on the VPS, and restart:
+Pull the latest production runtime files from Git, pull the pushed images on the VPS, and restart:
 
 ```powershell
 .\scripts\aws-deploy.ps1 up
 .\scripts\aws-deploy.ps1 status
 ```
 
-`up` first copies only the runtime files the VPS needs:
+`up` first updates the Git checkout on the VPS:
+
+```bash
+git fetch --prune origin
+git pull --ff-only origin main
+```
+
+Then it copies only ignored runtime files that are intentionally not committed:
 
 ```txt
-compose.server.yml
 .env
 .cms.env
 db/dumps/001-arcturus-base.sql, only if present locally

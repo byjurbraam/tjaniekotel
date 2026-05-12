@@ -120,8 +120,8 @@ services:
     image: ${IMAGE_REPOSITORY:?Set IMAGE_REPOSITORY}/${IMAGE_NAME_PREFIX:-tjanoekhotel}-cms:${IMAGE_TAG:-latest}
     pull_policy: never
     build:
-      context: ./vendor/nitro-docker/atomcms
-      dockerfile: ../../../docker/cms.Dockerfile
+      context: .
+      dockerfile: docker/cms.Dockerfile
     depends_on:
       assets:
         condition: service_started

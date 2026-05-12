@@ -29,9 +29,11 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 RUN git config --global --add safe.directory /app
 RUN git clone --recurse-submodules https://github.com/ObjectRetros/atomcms.git .
 RUN git checkout $COMMIT
-# Real-money shop removal.
-COPY ./docker-patches/disable-paid-shop.php /tmp/disable-paid-shop.php
+# Real-money shop removal and Tjaniekotel homepage copy.
+COPY scripts/disable-paid-shop.php /tmp/disable-paid-shop.php
+COPY scripts/customize-free-homepage.php /tmp/customize-free-homepage.php
 RUN php /tmp/disable-paid-shop.php /app
+RUN php /tmp/customize-free-homepage.php /app
 
 # Local Docker compatibility redirects. In this setup Nitro is served by the
 # separate nitro container, while AtomCMS may still contain older client paths.
@@ -244,13 +246,13 @@ RUN chown -R www-data:www-data /var/www/html
 
 RUN install-php-extensions sockets intl gd
 
-COPY --chmod=755 ./entrypoint.d/ /etc/entrypoint.d/
+COPY --chmod=755 docker/cms-entrypoint.d/ /etc/entrypoint.d/
 
 # Tjaniekotel branding assets are intentionally copied after dependency and
 # extension installation so a logo change does not invalidate package layers.
-COPY --chown=www-data:www-data ./branding/tjaniekotel-logo.webp /var/www/html/public/assets/images/tjaniekotel-logo.webp
-COPY --chown=www-data:www-data ./branding/tjaniekotel-logo.png /var/www/html/public/assets/images/tjaniekotel-logo.png
-COPY --chown=www-data:www-data ./branding/favicon.ico /var/www/html/public/favicon.ico
+COPY --chown=www-data:www-data branding/tjaniekotel-logo.webp /var/www/html/public/assets/images/tjaniekotel-logo.webp
+COPY --chown=www-data:www-data branding/tjaniekotel-logo.png /var/www/html/public/assets/images/tjaniekotel-logo.png
+COPY --chown=www-data:www-data branding/favicon.ico /var/www/html/public/favicon.ico
 RUN test -s /var/www/html/public/assets/images/tjaniekotel-logo.png \
     && test -s /var/www/html/public/assets/images/tjaniekotel-logo.webp \
     && test -s /var/www/html/public/favicon.ico

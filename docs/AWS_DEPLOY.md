@@ -6,7 +6,7 @@ Use this when deploying or debugging the AWS server. The production flow is:
 2. Push those images to the registry.
 3. SSH to the VPS and run `docker compose pull` + `docker compose up`.
 
-That keeps Node, npm, pnpm, Composer, Gradle, app packages, Nitro config, and runtime assets out of the VPS host. The server only needs Docker, `.env`, `.cms.env`, the compose file, and persistent database/storage volumes for normal deploys.
+That keeps Node, npm, pnpm, Composer, Gradle, app packages, Nitro config, and runtime assets out of the VPS host. The server only needs Docker, `compose.server.yml`, `.env`, `.cms.env`, optional init SQL files, and persistent database/storage volumes for normal deploys.
 
 Do not build application images on the VPS for normal deploys. If GHCR or another registry rejects a push/pull, fix registry authentication or permissions before deploying.
 
@@ -62,7 +62,7 @@ C:\tjanoekhotel\.deploy_ssh_key.pem
 
 The AWS host is Amazon Linux 2023. Docker and Docker Compose v2 were installed on the host so containers can run.
 
-Git and Python were used for the old bootstrap flow. They are not needed for normal production deploys once `vendor/nitro-docker` config/assets exist on the server and the application images are in the registry.
+Git, Python, Node, Composer, and app build tools are not needed for normal production deploys. The VPS is not required to be a Git checkout.
 
 Node packages are installed inside Dockerfiles only:
 
@@ -104,23 +104,23 @@ The registry build includes:
 - `cms`: compiled AtomCMS app
 - `proxy`: nginx reverse proxy with the project route template
 
-Pull the pushed images on the VPS and restart:
+Sync only the runtime deploy files, pull the pushed images on the VPS, and restart:
 
 ```powershell
 .\scripts\aws-deploy.ps1 up
 .\scripts\aws-deploy.ps1 status
 ```
 
-`up` updates the server checkout first:
+`up` first copies only the runtime files the VPS needs:
 
-```bash
-git fetch --prune origin
-git pull --ff-only origin main
+```txt
+compose.server.yml
+.env
+.cms.env
+db/dumps/001-arcturus-base.sql, only if present locally
 ```
 
-when `VPS_PROJECT_DIR` is a Git checkout. If the server directory is not a Git checkout yet, the script falls back to syncing only the deploy files.
-
-Then it runs:
+Then it runs on the VPS:
 
 ```bash
 sudo docker compose --env-file .env -f compose.server.yml pull
@@ -129,13 +129,7 @@ sudo docker compose --env-file .env -f compose.server.yml up -d --remove-orphans
 
 It does not build on the VPS.
 
-## First-time/bootstrap fallback
-
-Only use this if the server is missing initial config files:
-
-```powershell
-.\scripts\aws-deploy.ps1 bootstrap
-```
+## No Server Builds
 
 There is no normal server-side build command. Build and push images from the build machine, then pull them on the VPS.
 

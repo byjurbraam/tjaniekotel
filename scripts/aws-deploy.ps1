@@ -1,5 +1,5 @@
 param(
-    [ValidateSet('ssh', 'sync', 'status', 'bootstrap', 'build', 'push', 'build-push', 'pull', 'up', 'logs')]
+    [ValidateSet('ssh', 'sync', 'status', 'build', 'push', 'build-push', 'pull', 'up', 'logs')]
     [string] $Action = 'status'
 )
 
@@ -33,7 +33,6 @@ foreach ($Required in 'VPS_HOST', 'VPS_USER', 'VPS_SSH_KEY_PATH') {
 
 $ProjectDir = if ($Config['VPS_PROJECT_DIR']) { $Config['VPS_PROJECT_DIR'] } else { '/opt/tjanoekhotel' }
 $ServerComposeFile = if ($Config['SERVER_COMPOSE_FILE']) { $Config['SERVER_COMPOSE_FILE'] } else { 'compose.server.yml' }
-$GitBranch = if ($Config['GIT_BRANCH']) { $Config['GIT_BRANCH'] } else { 'main' }
 $SshKey = $Config['VPS_SSH_KEY_PATH']
 
 if (-not (Test-Path -LiteralPath $SshKey)) {
@@ -64,35 +63,12 @@ function Copy-ToServer {
     & $Scp @SshOptions $LocalPath "${Target}:${RemotePath}"
 }
 
-function Sync-DeployFiles {
-    Invoke-Server "mkdir -p '$ProjectDir/scripts' '$ProjectDir/docker/nginx' '$ProjectDir/branding'"
+function Sync-RuntimeFiles {
     Invoke-Server "mkdir -p '$ProjectDir/db/dumps'"
 
     foreach ($File in @(
         '.env',
-        'AGENTS.md',
-        '.dockerignore',
-        'compose.server.yml',
-        'compose.registry-build.yml',
-        'compose.local.yml',
-        'docker/arcturus.Dockerfile',
-        'docker/assets.Dockerfile',
-        'docker/cms.Dockerfile',
-        'docker/imager.Dockerfile',
-        'docker/nitro.Dockerfile',
-        'docker/proxy.Dockerfile',
-        'docker/nginx/default.conf.template',
-        'docker/nitro-entrypoint.d/10-render-runtime-config.sh',
-        'branding/tjaniekotel-logo.png',
-        'branding/tjaniekotel-logo.webp',
-        'branding/favicon.ico',
-        'scripts/bootstrap-upstream.sh',
-        'scripts/disable-paid-shop.php',
-        'scripts/patch-atomcms-dockerfile.py',
-        'scripts/patch-nitro-config.py',
-        'scripts/patch-pnpm-dockerfiles.py',
-        'scripts/render-sql.py',
-        'scripts/render-upstream-env.sh'
+        'compose.server.yml'
     )) {
         $Local = Join-Path $Root $File
         if (-not (Test-Path -LiteralPath $Local)) {
@@ -116,23 +92,6 @@ function Sync-DeployFiles {
     if (Test-Path -LiteralPath $BaseSql) {
         Copy-ToServer $BaseSql "$ProjectDir/db/dumps/001-arcturus-base.sql"
     }
-
-    Invoke-Server "cd '$ProjectDir' && chmod +x scripts/*.sh scripts/*.py"
-}
-
-function Test-ServerGitCheckout {
-    & $Ssh @SshOptions $Target "test -d '$ProjectDir/.git'"
-    return $LASTEXITCODE -eq 0
-}
-
-function Refresh-ServerSource {
-    if (Test-ServerGitCheckout) {
-        Invoke-Server "cd '$ProjectDir' && git fetch --prune origin && git pull --ff-only origin '$GitBranch'"
-        return
-    }
-
-    Write-Host "Server path is not a Git checkout yet; syncing deploy files instead."
-    Sync-DeployFiles
 }
 
 function Invoke-LocalCompose {
@@ -152,15 +111,11 @@ switch ($Action) {
         & $Ssh @SshOptions $Target
     }
     'sync' {
-        Sync-DeployFiles
+        Sync-RuntimeFiles
     }
     'status' {
         Invoke-ServerCompose 'ps'
         Invoke-Server "sudo docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
-    }
-    'bootstrap' {
-        Sync-DeployFiles
-        Invoke-Server "cd '$ProjectDir' && ./scripts/bootstrap-upstream.sh"
     }
     'build' {
         Invoke-LocalCompose @('build')
@@ -173,11 +128,11 @@ switch ($Action) {
         Invoke-LocalCompose @('push')
     }
     'pull' {
-        Refresh-ServerSource
+        Sync-RuntimeFiles
         Invoke-ServerCompose 'pull'
     }
     'up' {
-        Refresh-ServerSource
+        Sync-RuntimeFiles
         Invoke-ServerCompose 'pull'
         Invoke-ServerCompose 'up -d --remove-orphans'
     }

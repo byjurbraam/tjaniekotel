@@ -95,7 +95,7 @@ Build and push the production images:
 .\scripts\aws-deploy.ps1 build-push
 ```
 
-`compose.registry-build.yml` is not a production runtime compose file. It exists only to build and push the tagged images from the local build machine or CI.
+`compose.local.yml` is used for local development and for building/pushing the tagged images from the local build machine or CI. The deploy script builds and pushes only the project image services: `arcturus`, `nitro`, `assets`, `imager`, `cms`, and `proxy`.
 
 The registry build includes:
 

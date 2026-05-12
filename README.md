@@ -6,8 +6,7 @@ This scaffold is designed for a VPS or server where you want a repeatable Docker
 
 ## What is included
 
-- `compose.local.yml` for local development builds.
-- `compose.registry-build.yml` only for building and pushing registry images from the build machine or CI.
+- `compose.local.yml` for local development and building/pushing registry images from the build machine or CI.
 - `compose.server.yml` for public deployment with prebuilt images pulled by the VPS.
 - Scripts to pull the upstream open-source stack into `vendor/nitro-docker`.
 - Environment rendering for the upstream `.env` and `.cms.env` files.
@@ -157,7 +156,6 @@ By default, `vendor/` is ignored so you push only this scaffold, not a cloned co
 .
 ├── caddy/Caddyfile
 ├── compose.local.yml
-├── compose.registry-build.yml
 ├── compose.server.yml
 ├── docs/
 ├── scripts/

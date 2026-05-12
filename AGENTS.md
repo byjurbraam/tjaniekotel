@@ -19,7 +19,7 @@
 - Recreate app containers only when needed and avoid recreating the database container unless required. A normal `up -d --no-deps --force-recreate <service>` is preferred for targeted app refreshes.
 - Production deploys must build Docker images locally or in CI, push them to the registry, then update the VPS with `docker compose pull` and `docker compose up -d`. Do not build application images on the VPS during normal deploys.
 - If registry push/pull fails, fix registry authentication or permissions first. Do not work around a registry problem by doing a server-side production build unless the user explicitly approves an emergency exception.
-- `compose.registry-build.yml` is only for build/push on the build machine. `compose.server.yml` is only for pull/run on the VPS. Do not run both as production builds; the same tagged images should be reused by changing only Compose environment values.
+- `compose.local.yml` is used for local development and for build/push on the build machine. `compose.server.yml` is only for pull/run on the VPS. Do not create a second registry-build compose file unless there is a clear need; the same tagged images should be reused by changing only Compose environment values.
 - The VPS should be a Git checkout for production runtime files so `compose.server.yml` and deploy docs/rules can be updated with `git pull`. It still must not build application images on the VPS.
 - When deploying to the VPS, first run `git pull --ff-only` for production runtime files, then sync ignored env files if needed, then run `docker compose --env-file .env -f compose.server.yml pull` and `docker compose --env-file .env -f compose.server.yml up -d --remove-orphans`.
 

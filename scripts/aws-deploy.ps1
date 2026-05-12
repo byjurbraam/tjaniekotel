@@ -35,6 +35,7 @@ $ProjectDir = if ($Config['VPS_PROJECT_DIR']) { $Config['VPS_PROJECT_DIR'] } els
 $ServerComposeFile = if ($Config['SERVER_COMPOSE_FILE']) { $Config['SERVER_COMPOSE_FILE'] } else { 'compose.server.yml' }
 $GitBranch = if ($Config['GIT_BRANCH']) { $Config['GIT_BRANCH'] } else { 'main' }
 $SshKey = $Config['VPS_SSH_KEY_PATH']
+$ImageServices = @('arcturus', 'nitro', 'assets', 'imager', 'cms', 'proxy')
 
 if (-not (Test-Path -LiteralPath $SshKey)) {
     throw "SSH key does not exist: $SshKey"
@@ -110,7 +111,7 @@ git pull --ff-only origin '$GitBranch'
 function Invoke-LocalCompose {
     param([Parameter(Mandatory)][string[]] $Arguments)
 
-    & docker compose --env-file (Join-Path $Root '.env') -f (Join-Path $Root 'compose.registry-build.yml') @Arguments
+    & docker compose --env-file (Join-Path $Root '.env') -f (Join-Path $Root 'compose.local.yml') @Arguments
 }
 
 function Invoke-ServerCompose {
@@ -132,14 +133,14 @@ switch ($Action) {
         Invoke-Server "sudo docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
     }
     'build' {
-        Invoke-LocalCompose @('build')
+        Invoke-LocalCompose (@('build') + $ImageServices)
     }
     'push' {
-        Invoke-LocalCompose @('push')
+        Invoke-LocalCompose (@('push') + $ImageServices)
     }
     'build-push' {
-        Invoke-LocalCompose @('build')
-        Invoke-LocalCompose @('push')
+        Invoke-LocalCompose (@('build') + $ImageServices)
+        Invoke-LocalCompose (@('push') + $ImageServices)
     }
     'pull' {
         Update-ServerGitCheckout

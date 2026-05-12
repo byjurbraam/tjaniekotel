@@ -5,8 +5,11 @@ import shutil
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCKERFILE = ROOT / "vendor" / "nitro-docker" / "atomcms" / "Dockerfile"
+NITRO_DOCKERFILE = ROOT / "vendor" / "nitro-docker" / "nitro" / "Dockerfile"
 BRANDING_SOURCE = ROOT / "branding"
 BRANDING_DESTINATION = ROOT / "vendor" / "nitro-docker" / "atomcms" / "branding"
+NITRO_BRANDING_DESTINATION = ROOT / "vendor" / "nitro-docker" / "nitro"
+ASSETS_BRANDING_DESTINATION = ROOT / "vendor" / "nitro-docker" / "assets"
 PATCH_SOURCE = ROOT / "scripts" / "disable-paid-shop.php"
 PATCH_DESTINATION = ROOT / "vendor" / "nitro-docker" / "atomcms" / "docker-patches"
 BRANDING_FILES = (
@@ -66,6 +69,10 @@ COPY ./docker-patches/disable-paid-shop.php /tmp/disable-paid-shop.php
 RUN php /tmp/disable-paid-shop.php /app
 '''.lstrip("\n")
 
+NITRO_FAVICON_MARKER = "COPY favicon.ico /usr/share/nginx/html/favicon.ico"
+NITRO_FAVICON_NEEDLE = "COPY --from=builder /build/dist/apps/frontend/ /usr/share/nginx/html/\n"
+NITRO_FAVICON_PATCH = "COPY favicon.ico /usr/share/nginx/html/favicon.ico\n"
+
 
 def sync_branding_files() -> None:
     missing = [name for name in BRANDING_FILES if not (BRANDING_SOURCE / name).exists()]
@@ -76,6 +83,9 @@ def sync_branding_files() -> None:
     for name in BRANDING_FILES:
         shutil.copy2(BRANDING_SOURCE / name, BRANDING_DESTINATION / name)
 
+    shutil.copy2(BRANDING_SOURCE / "favicon.ico", NITRO_BRANDING_DESTINATION / "favicon.ico")
+    shutil.copy2(BRANDING_SOURCE / "favicon.ico", ASSETS_BRANDING_DESTINATION / "favicon.ico")
+
 
 def sync_patch_files() -> None:
     if not PATCH_SOURCE.exists():
@@ -83,6 +93,24 @@ def sync_patch_files() -> None:
 
     PATCH_DESTINATION.mkdir(parents=True, exist_ok=True)
     shutil.copy2(PATCH_SOURCE, PATCH_DESTINATION / PATCH_SOURCE.name)
+
+
+def patch_nitro_dockerfile() -> bool:
+    if not NITRO_DOCKERFILE.exists():
+        return False
+
+    contents = NITRO_DOCKERFILE.read_text(encoding="utf-8")
+    if NITRO_FAVICON_MARKER in contents:
+        return False
+
+    if NITRO_FAVICON_NEEDLE not in contents:
+        raise SystemExit(f"Could not find Nitro favicon insertion point in {NITRO_DOCKERFILE}")
+
+    NITRO_DOCKERFILE.write_text(
+        contents.replace(NITRO_FAVICON_NEEDLE, NITRO_FAVICON_NEEDLE + NITRO_FAVICON_PATCH),
+        encoding="utf-8",
+    )
+    return True
 
 
 def main() -> None:
@@ -123,6 +151,11 @@ def main() -> None:
 
     print("Synced AtomCMS branding assets.")
     print("Synced AtomCMS commerce removal patch.")
+
+    if patch_nitro_dockerfile():
+        print("Patched Nitro Dockerfile favicon.")
+
+    print("Synced Nitro and assets favicon.")
 
 
 if __name__ == "__main__":

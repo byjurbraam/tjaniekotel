@@ -19,3 +19,4 @@ COPY --from=builder /build/dist/apps/frontend/ /usr/share/nginx/html/
 COPY nitro/nginx.conf /etc/nginx/conf.d/default.conf
 COPY nitro/renderer-config.json /usr/share/nginx/html/renderer-config.json
 COPY nitro/ui-config.json /usr/share/nginx/html/ui-config.json
+COPY nitro/favicon.ico /usr/share/nginx/html/favicon.ico

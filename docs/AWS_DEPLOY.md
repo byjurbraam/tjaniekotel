@@ -6,7 +6,7 @@ Use this when deploying or debugging the AWS server. The intended production flo
 2. Push those images to the registry.
 3. SSH to the VPS and run `docker compose pull` + `docker compose up`.
 
-That keeps Node, npm, pnpm, Composer, Gradle, and app packages out of the VPS host. The server only needs Docker for normal deploys.
+That keeps Node, npm, pnpm, Composer, Gradle, app packages, Nitro config, and runtime assets out of the VPS host. The server only needs Docker, `.env`, `.cms.env`, the compose file, and persistent database/storage volumes for normal deploys.
 
 References: Docker Compose tags images from `image:` during builds, can push them to a registry, and can later pull those images with `docker compose pull`.
 
@@ -95,6 +95,14 @@ Build and push the production images:
 ```powershell
 .\scripts\aws-deploy.ps1 build-push
 ```
+
+The registry build includes:
+
+- `arcturus`: emulator plus `/app/assets`
+- `nitro`: compiled Nitro client plus nginx and Nitro JSON config
+- `assets`: nginx asset server plus bundled runtime assets
+- `imager`: compiled Nitro imager plus `/app/assets`
+- `cms`: compiled AtomCMS app
 
 Sync compose/env files, pull the pushed images on the VPS, and restart:
 

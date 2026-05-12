@@ -65,6 +65,7 @@ function Copy-ToServer {
 
 function Sync-DeployFiles {
     Invoke-Server "mkdir -p '$ProjectDir/scripts' '$ProjectDir/caddy'"
+    Invoke-Server "mkdir -p '$ProjectDir/db/dumps'"
 
     foreach ($File in @(
         '.env',
@@ -87,6 +88,20 @@ function Sync-DeployFiles {
 
         $Remote = "$ProjectDir/$($File -replace '\\', '/')"
         Copy-ToServer $Local $Remote
+    }
+
+    $CmsEnv = Join-Path $Root '.cms.env'
+    if (-not (Test-Path -LiteralPath $CmsEnv)) {
+        $CmsEnv = Join-Path $Root 'vendor/nitro-docker/.cms.env'
+    }
+
+    if (Test-Path -LiteralPath $CmsEnv) {
+        Copy-ToServer $CmsEnv "$ProjectDir/.cms.env"
+    }
+
+    $BaseSql = Join-Path $Root 'db/dumps/001-arcturus-base.sql'
+    if (Test-Path -LiteralPath $BaseSql) {
+        Copy-ToServer $BaseSql "$ProjectDir/db/dumps/001-arcturus-base.sql"
     }
 
     Invoke-Server "cd '$ProjectDir' && chmod +x scripts/*.sh scripts/*.py"

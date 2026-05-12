@@ -4,17 +4,26 @@ services:
   arcturus:
     image: ${IMAGE_REPOSITORY:?Set IMAGE_REPOSITORY}/${IMAGE_NAME_PREFIX:-tjanoekhotel}-arcturus:${IMAGE_TAG:-latest}
     build:
-      context: ./vendor/nitro-docker/arcturus
+      context: ./vendor/nitro-docker
+      dockerfile: ../../docker/arcturus.Dockerfile
 
   nitro:
     image: ${IMAGE_REPOSITORY:?Set IMAGE_REPOSITORY}/${IMAGE_NAME_PREFIX:-tjanoekhotel}-nitro:${IMAGE_TAG:-latest}
     build:
-      context: ./vendor/nitro-docker/nitro
+      context: ./vendor/nitro-docker
+      dockerfile: ../../docker/nitro.Dockerfile
+
+  assets:
+    image: ${IMAGE_REPOSITORY:?Set IMAGE_REPOSITORY}/${IMAGE_NAME_PREFIX:-tjanoekhotel}-assets:${IMAGE_TAG:-latest}
+    build:
+      context: ./vendor/nitro-docker
+      dockerfile: ../../docker/assets.Dockerfile
 
   imager:
     image: ${IMAGE_REPOSITORY:?Set IMAGE_REPOSITORY}/${IMAGE_NAME_PREFIX:-tjanoekhotel}-imager:${IMAGE_TAG:-latest}
     build:
-      context: ./vendor/nitro-docker/imager
+      context: ./vendor/nitro-docker
+      dockerfile: ../../docker/imager.Dockerfile
 
   cms:
     image: ${IMAGE_REPOSITORY:?Set IMAGE_REPOSITORY}/${IMAGE_NAME_PREFIX:-tjanoekhotel}-cms:${IMAGE_TAG:-latest}

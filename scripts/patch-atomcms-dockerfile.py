@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
 from pathlib import Path
+import shutil
 
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCKERFILE = ROOT / "vendor" / "nitro-docker" / "atomcms" / "Dockerfile"
+BRANDING_SOURCE = ROOT / "branding"
+BRANDING_DESTINATION = ROOT / "vendor" / "nitro-docker" / "atomcms" / "branding"
+BRANDING_FILES = (
+    "tjaniekotel-logo.webp",
+    "tjaniekotel-logo.png",
+    "favicon.ico",
+)
 
 MARKER = "Route::redirect('/game/nitr', '/game/nitro');"
 NEEDLE = "RUN git checkout $COMMIT\n"
@@ -37,21 +45,56 @@ PHP
 EOF
 '''.lstrip("\n")
 
+BRANDING_MARKER = "Tjaniekotel branding assets."
+BRANDING_NEEDLE = "COPY --from=npm-builder --chown=www-data:www-data /app /var/www/html\n"
+BRANDING_PATCH = r'''
+
+# Tjaniekotel branding assets.
+COPY --chown=www-data:www-data ./branding/tjaniekotel-logo.webp /var/www/html/public/assets/images/tjaniekotel-logo.webp
+COPY --chown=www-data:www-data ./branding/tjaniekotel-logo.png /var/www/html/public/assets/images/tjaniekotel-logo.png
+COPY --chown=www-data:www-data ./branding/favicon.ico /var/www/html/public/favicon.ico
+'''.lstrip("\n")
+
+
+def sync_branding_files() -> None:
+    missing = [name for name in BRANDING_FILES if not (BRANDING_SOURCE / name).exists()]
+    if missing:
+        raise SystemExit(f"Missing branding files: {', '.join(missing)}")
+
+    BRANDING_DESTINATION.mkdir(parents=True, exist_ok=True)
+    for name in BRANDING_FILES:
+        shutil.copy2(BRANDING_SOURCE / name, BRANDING_DESTINATION / name)
+
 
 def main() -> None:
     if not DOCKERFILE.exists():
         raise SystemExit(f"Missing {DOCKERFILE}")
 
+    sync_branding_files()
     contents = DOCKERFILE.read_text(encoding="utf-8")
-    if MARKER in contents:
-        print("AtomCMS Dockerfile compatibility redirects already patched.")
-        return
+    changed = False
 
-    if NEEDLE not in contents:
-        raise SystemExit(f"Could not find insertion point in {DOCKERFILE}")
+    if MARKER not in contents:
+        if NEEDLE not in contents:
+            raise SystemExit(f"Could not find redirects insertion point in {DOCKERFILE}")
 
-    DOCKERFILE.write_text(contents.replace(NEEDLE, NEEDLE + PATCH), encoding="utf-8")
-    print("Patched AtomCMS Dockerfile compatibility redirects.")
+        contents = contents.replace(NEEDLE, NEEDLE + PATCH)
+        changed = True
+
+    if BRANDING_MARKER not in contents:
+        if BRANDING_NEEDLE not in contents:
+            raise SystemExit(f"Could not find branding insertion point in {DOCKERFILE}")
+
+        contents = contents.replace(BRANDING_NEEDLE, BRANDING_NEEDLE + BRANDING_PATCH)
+        changed = True
+
+    if changed:
+        DOCKERFILE.write_text(contents, encoding="utf-8")
+        print("Patched AtomCMS Dockerfile.")
+    else:
+        print("AtomCMS Dockerfile already patched.")
+
+    print("Synced AtomCMS branding assets.")
 
 
 if __name__ == "__main__":

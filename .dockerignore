@@ -14,8 +14,11 @@ amz_private_key.pem
 node_modules
 vendor/nitro-docker/db/data
 vendor/nitro-docker/db/backup
+vendor/nitro-docker/db/dumps
+vendor/nitro-docker/db/conf.d
 vendor/nitro-docker/atomcms/logs
 vendor/nitro-docker/atomcms/storage
+vendor/nitro-docker/atomcms/gamedata
 vendor/nitro-docker/assets/usercontent/imageproxy/cache
 generated
 test-results

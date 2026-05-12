@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.7
+
 # Stage 1: Composer dependencies
 FROM php:8.4-cli-alpine AS composer-builder
 
@@ -90,7 +92,8 @@ PHP
 EOF
 
 # Install composer dependencies
-RUN composer install \
+RUN --mount=type=cache,id=atomcms-composer-cache,target=/tmp/composer-cache \
+    COMPOSER_CACHE_DIR=/tmp/composer-cache composer install \
     --no-interaction \
     --no-dev \
     --prefer-dist \
@@ -110,7 +113,8 @@ WORKDIR /app
 COPY --from=composer-builder /app /app
 
 # Install dependencies and build assets
-RUN yarn install --frozen-lockfile
+RUN --mount=type=cache,id=atomcms-yarn-cache,target=/usr/local/share/.cache/yarn \
+    yarn install --frozen-lockfile --cache-folder /usr/local/share/.cache/yarn
 RUN yarn run build:atom
 RUN yarn run build:dusk
 
@@ -130,13 +134,6 @@ USER root
 
 # Copy application from npm-builder
 COPY --from=npm-builder --chown=www-data:www-data /app /var/www/html
-# Tjaniekotel branding assets.
-COPY --chown=www-data:www-data ./branding/tjaniekotel-logo.webp /var/www/html/public/assets/images/tjaniekotel-logo.webp
-COPY --chown=www-data:www-data ./branding/tjaniekotel-logo.png /var/www/html/public/assets/images/tjaniekotel-logo.png
-COPY --chown=www-data:www-data ./branding/favicon.ico /var/www/html/public/favicon.ico
-RUN test -s /var/www/html/public/assets/images/tjaniekotel-logo.png \
-    && test -s /var/www/html/public/assets/images/tjaniekotel-logo.webp \
-    && test -s /var/www/html/public/favicon.ico
 
 # Create necessary directories and set permissions
 RUN mkdir -p \
@@ -248,6 +245,15 @@ RUN chown -R www-data:www-data /var/www/html
 RUN install-php-extensions sockets intl gd
 
 COPY --chmod=755 ./entrypoint.d/ /etc/entrypoint.d/
+
+# Tjaniekotel branding assets are intentionally copied after dependency and
+# extension installation so a logo change does not invalidate package layers.
+COPY --chown=www-data:www-data ./branding/tjaniekotel-logo.webp /var/www/html/public/assets/images/tjaniekotel-logo.webp
+COPY --chown=www-data:www-data ./branding/tjaniekotel-logo.png /var/www/html/public/assets/images/tjaniekotel-logo.png
+COPY --chown=www-data:www-data ./branding/favicon.ico /var/www/html/public/favicon.ico
+RUN test -s /var/www/html/public/assets/images/tjaniekotel-logo.png \
+    && test -s /var/www/html/public/assets/images/tjaniekotel-logo.webp \
+    && test -s /var/www/html/public/favicon.ico
 
 COPY --chmod=755 <<'EOF' /etc/entrypoint.d/20-ensure-default-news-image.sh
 #!/bin/sh

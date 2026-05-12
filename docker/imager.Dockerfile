@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.7
+
 FROM node:20-slim AS builder
 
 ARG BRANCH=dev
@@ -31,9 +33,10 @@ RUN node -e " \
   console.log('Fixed library.parts check in AvatarAssetDownloadManager.ts'); \
 "
 
-RUN yarn install
+RUN --mount=type=cache,id=imager-yarn-cache,target=/usr/local/share/.cache/yarn \
+    yarn install --cache-folder /usr/local/share/.cache/yarn
 RUN yarn build
 
-COPY assets/ /app/assets/
+COPY vendor/nitro-docker/assets/ /app/assets/
 
 ENTRYPOINT ["node", "/app/dist/src/main.js"]

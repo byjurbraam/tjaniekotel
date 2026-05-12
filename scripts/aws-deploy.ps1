@@ -1,6 +1,7 @@
 param(
     [ValidateSet('ssh', 'sync', 'status', 'build', 'push', 'build-push', 'pull', 'up', 'logs')]
-    [string] $Action = 'status'
+    [string] $Action = 'status',
+    [string[]] $Services = @()
 )
 
 $ErrorActionPreference = 'Stop'
@@ -36,6 +37,15 @@ $ServerComposeFile = if ($Config['SERVER_COMPOSE_FILE']) { $Config['SERVER_COMPO
 $GitBranch = if ($Config['GIT_BRANCH']) { $Config['GIT_BRANCH'] } else { 'main' }
 $SshKey = $Config['VPS_SSH_KEY_PATH']
 $ImageServices = @('arcturus', 'nitro', 'assets', 'imager', 'cms', 'proxy')
+$HasSelectedServices = $Services.Count -gt 0
+$SelectedImageServices = if ($Services.Count -gt 0) { $Services } else { $ImageServices }
+$SelectedServiceArgs = $SelectedImageServices -join ' '
+
+foreach ($Service in $SelectedImageServices) {
+    if ($ImageServices -notcontains $Service) {
+        throw "Unknown image service '$Service'. Valid image services: $($ImageServices -join ', ')"
+    }
+}
 
 if (-not (Test-Path -LiteralPath $SshKey)) {
     throw "SSH key does not exist: $SshKey"
@@ -133,25 +143,34 @@ switch ($Action) {
         Invoke-Server "sudo docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
     }
     'build' {
-        Invoke-LocalCompose (@('build') + $ImageServices)
+        Invoke-LocalCompose (@('build') + $SelectedImageServices)
     }
     'push' {
-        Invoke-LocalCompose (@('push') + $ImageServices)
+        Invoke-LocalCompose (@('push') + $SelectedImageServices)
     }
     'build-push' {
-        Invoke-LocalCompose (@('build') + $ImageServices)
-        Invoke-LocalCompose (@('push') + $ImageServices)
+        Invoke-LocalCompose (@('build') + $SelectedImageServices)
+        Invoke-LocalCompose (@('push') + $SelectedImageServices)
     }
     'pull' {
         Update-ServerGitCheckout
         Sync-IgnoredRuntimeFiles
-        Invoke-ServerCompose 'pull'
+        if ($HasSelectedServices) {
+            Invoke-ServerCompose "pull $SelectedServiceArgs"
+        } else {
+            Invoke-ServerCompose 'pull'
+        }
     }
     'up' {
         Update-ServerGitCheckout
         Sync-IgnoredRuntimeFiles
-        Invoke-ServerCompose 'pull'
-        Invoke-ServerCompose 'up -d --remove-orphans'
+        if ($HasSelectedServices) {
+            Invoke-ServerCompose "pull $SelectedServiceArgs"
+            Invoke-ServerCompose "up -d --no-deps $SelectedServiceArgs"
+        } else {
+            Invoke-ServerCompose 'pull'
+            Invoke-ServerCompose 'up -d --remove-orphans'
+        }
     }
     'logs' {
         Invoke-ServerCompose 'logs --tail=160'

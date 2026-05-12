@@ -106,8 +106,6 @@ services:
 
   imgproxy:
     image: ghcr.io/willnorris/imageproxy
-    volumes:
-      - imageproxy_cache:/tmp/imageproxy
     env_file:
       - ./.env
     restart: unless-stopped
@@ -124,10 +122,8 @@ services:
         condition: service_started
       db:
         condition: service_healthy
-    volumes:
-      - ./.cms.env:/var/www/html/.env
-      - cms_storage:/var/www/html/storage/app/public
-      - cms_logs:/var/www/html/storage/logs
+    env_file:
+      - ${CMS_ENV_FILE:-./.cms.env}
     restart: unless-stopped
     networks:
       - nitro
@@ -137,7 +133,4 @@ networks:
     internal: false
 
 volumes:
-  cms_logs:
-  cms_storage:
   db_data:
-  imageproxy_cache:

@@ -6,7 +6,7 @@ Use this when deploying or debugging the AWS server. The production flow is:
 2. Push those images to the registry.
 3. SSH to the VPS and run `docker compose pull` + `docker compose up`.
 
-That keeps Node, npm, pnpm, Composer, Gradle, app packages, Nitro config, and runtime assets out of the VPS host. The server only needs Docker, a Git checkout for production runtime files such as `compose.server.yml`, `.env`, `.cms.env`, optional init SQL files, and persistent database/storage volumes for normal deploys.
+That keeps Node, npm, pnpm, Composer, Gradle, app packages, Nitro config, and runtime assets out of the VPS host. The server only needs Docker, a Git checkout for production runtime files such as `compose.server.yml`, `.env`, `.cms.env`, optional init SQL files, and persistent database volumes for normal deploys.
 
 Do not build application images on the VPS for normal deploys. If GHCR or another registry rejects a push/pull, fix registry authentication or permissions before deploying.
 
@@ -97,6 +97,12 @@ Build and push the production images:
 
 `compose.local.yml` is used for local development and for building/pushing the tagged images from the local build machine or CI. The deploy script builds and pushes only the project image services: `arcturus`, `nitro`, `assets`, `imager`, `cms`, and `proxy`.
 
+When only specific images changed, pass those service names so unchanged images keep their existing layers and are not rebuilt or pushed:
+
+```powershell
+.\scripts\aws-deploy.ps1 build-push -Services cms,proxy
+```
+
 The registry build includes:
 
 - `arcturus`: emulator plus `/app/assets`
@@ -110,6 +116,13 @@ Pull the latest production runtime files from Git, pull the pushed images on the
 
 ```powershell
 .\scripts\aws-deploy.ps1 up
+.\scripts\aws-deploy.ps1 status
+```
+
+For normal updates, prefer targeting only the services that changed. This pulls and recreates only those containers, leaving the database and unrelated containers untouched:
+
+```powershell
+.\scripts\aws-deploy.ps1 up -Services cms,proxy
 .\scripts\aws-deploy.ps1 status
 ```
 
@@ -133,6 +146,13 @@ Then it runs on the VPS:
 ```bash
 sudo docker compose --env-file .env -f compose.server.yml pull
 sudo docker compose --env-file .env -f compose.server.yml up -d --remove-orphans
+```
+
+When `-Services` is used, the script runs targeted equivalents:
+
+```bash
+sudo docker compose --env-file .env -f compose.server.yml pull cms proxy
+sudo docker compose --env-file .env -f compose.server.yml up -d --no-deps cms proxy
 ```
 
 It does not build on the VPS.

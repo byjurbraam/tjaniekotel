@@ -3,13 +3,12 @@ name: ${PROJECT_NAME:-retro_hotel}
 services:
   arcturus:
     image: ${IMAGE_REPOSITORY:?Set IMAGE_REPOSITORY}/${IMAGE_NAME_PREFIX:-tjanoekhotel}-arcturus:${IMAGE_TAG:-latest}
+    pull_policy: never
     build:
-      context: ./vendor/nitro-docker
-      dockerfile: ../../docker/arcturus.Dockerfile
+      context: .
+      dockerfile: docker/arcturus.Dockerfile
     env_file:
       - ./vendor/nitro-docker/.env
-    volumes:
-      - ./vendor/nitro-docker/assets/:/app/assets/
     depends_on:
       db:
         condition: service_healthy
@@ -19,6 +18,7 @@ services:
 
   nitro:
     image: ${IMAGE_REPOSITORY:?Set IMAGE_REPOSITORY}/${IMAGE_NAME_PREFIX:-tjanoekhotel}-nitro:${IMAGE_TAG:-latest}
+    pull_policy: never
     build:
       context: .
       dockerfile: docker/nitro.Dockerfile
@@ -83,38 +83,33 @@ services:
 
   assets:
     image: ${IMAGE_REPOSITORY:?Set IMAGE_REPOSITORY}/${IMAGE_NAME_PREFIX:-tjanoekhotel}-assets:${IMAGE_TAG:-latest}
+    pull_policy: never
     build:
-      context: ./vendor/nitro-docker
-      dockerfile: ../../docker/assets.Dockerfile
+      context: .
+      dockerfile: docker/assets.Dockerfile
     restart: unless-stopped
     depends_on:
       - imager
       - imgproxy
     env_file:
       - ./vendor/nitro-docker/.env
-    volumes:
-      - ./vendor/nitro-docker/assets/nginx:/etc/nginx/conf.d/:ro
-      - ./vendor/nitro-docker/assets/:/usr/share/nginx/html
     networks:
       - nitro
 
   imager:
     image: ${IMAGE_REPOSITORY:?Set IMAGE_REPOSITORY}/${IMAGE_NAME_PREFIX:-tjanoekhotel}-imager:${IMAGE_TAG:-latest}
+    pull_policy: never
     build:
-      context: ./vendor/nitro-docker
-      dockerfile: ../../docker/imager.Dockerfile
+      context: .
+      dockerfile: docker/imager.Dockerfile
     env_file:
       - ./vendor/nitro-docker/.env
-    volumes:
-      - ./vendor/nitro-docker/assets/:/app/assets/
     restart: unless-stopped
     networks:
       - nitro
 
   imgproxy:
     image: ghcr.io/willnorris/imageproxy
-    volumes:
-      - ./vendor/nitro-docker/assets/usercontent/imageproxy/cache:/tmp/imageproxy
     env_file:
       - ./vendor/nitro-docker/.env
     restart: unless-stopped
@@ -123,6 +118,7 @@ services:
 
   cms:
     image: ${IMAGE_REPOSITORY:?Set IMAGE_REPOSITORY}/${IMAGE_NAME_PREFIX:-tjanoekhotel}-cms:${IMAGE_TAG:-latest}
+    pull_policy: never
     build:
       context: ./vendor/nitro-docker/atomcms
       dockerfile: ../../../docker/cms.Dockerfile
@@ -133,17 +129,15 @@ services:
         condition: service_started
       db:
         condition: service_healthy
-    volumes:
-      - ./vendor/nitro-docker/.cms.env:/var/www/html/.env
-      - ./vendor/nitro-docker/atomcms/storage:/var/www/html/storage/app/public
-      - ./vendor/nitro-docker/atomcms/logs:/var/www/html/storage/logs
-      - ./vendor/nitro-docker/atomcms/gamedata:/var/www/html/public/gamedata
+    env_file:
+      - ./vendor/nitro-docker/.cms.env
     restart: unless-stopped
     networks:
       - nitro
 
   proxy:
     image: ${IMAGE_REPOSITORY:?Set IMAGE_REPOSITORY}/${IMAGE_NAME_PREFIX:-tjanoekhotel}-proxy:${IMAGE_TAG:-latest}
+    pull_policy: never
     build:
       context: .
       dockerfile: docker/proxy.Dockerfile

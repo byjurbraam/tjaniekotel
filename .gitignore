@@ -1,4 +1,5 @@
 .env
+.env.deploy
 vendor/
 generated/*.sql
 !generated/.gitkeep

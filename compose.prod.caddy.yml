@@ -30,7 +30,8 @@ services:
     volumes:
       - ./vendor/nitro-docker/assets/:/app/assets/
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - nitro
@@ -58,6 +59,12 @@ services:
       - ./vendor/nitro-docker/db/data:/var/lib/mysql
       - ./vendor/nitro-docker/db/conf.d:/etc/mysql/conf.d:ro
       - ./vendor/nitro-docker/db/dumps:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
     restart: unless-stopped
     networks:
       - nitro
@@ -125,8 +132,12 @@ services:
     build:
       context: ./vendor/nitro-docker/atomcms
     depends_on:
-      - assets
-      - arcturus
+      assets:
+        condition: service_started
+      arcturus:
+        condition: service_started
+      db:
+        condition: service_healthy
     volumes:
       - ./vendor/nitro-docker/.cms.env:/var/www/html/.env
       - ./vendor/nitro-docker/atomcms/storage:/var/www/html/storage/app/public

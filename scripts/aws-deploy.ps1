@@ -64,6 +64,9 @@ $SshOptions = @(
 function Invoke-Server {
     param([Parameter(Mandatory)][string] $Command)
     & $Ssh @SshOptions $Target $Command
+    if ($LASTEXITCODE -ne 0) {
+        throw "Remote command failed with exit code $LASTEXITCODE"
+    }
 }
 
 function Copy-ToServer {
@@ -73,6 +76,9 @@ function Copy-ToServer {
     )
 
     & $Scp @SshOptions $LocalPath "${Target}:${RemotePath}"
+    if ($LASTEXITCODE -ne 0) {
+        throw "SCP failed with exit code $LASTEXITCODE"
+    }
 }
 
 function Sync-IgnoredRuntimeFiles {
@@ -122,6 +128,9 @@ function Invoke-LocalCompose {
     param([Parameter(Mandatory)][string[]] $Arguments)
 
     & docker compose --env-file (Join-Path $Root '.env') -f (Join-Path $Root 'compose.local.yml') @Arguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "Local docker compose failed with exit code $LASTEXITCODE"
+    }
 }
 
 function Invoke-ServerCompose {

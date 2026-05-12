@@ -1,5 +1,8 @@
 .env
+.cms.env
 .env.deploy
+db/backup/
+db/data/
 vendor/
 generated/*.sql
 !generated/.gitkeep

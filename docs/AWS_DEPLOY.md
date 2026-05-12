@@ -176,3 +176,13 @@ game.tjaniekahotel.nl     Nitro client
 assets.tjaniekahotel.nl   Assets
 ws.tjaniekahotel.nl       WebSocket
 ```
+
+## IAM For Opening Ports
+
+To let the deploy IAM user open the temporary direct IP test ports, attach the policy in:
+
+```txt
+docs/aws-security-group-port-policy.json
+```
+
+It grants only the EC2 actions needed to describe security groups and add inbound rules. After attaching it, add `AWS_SECRET_ACCESS_KEY` to `.env.deploy`, then the ports can be opened from this project.

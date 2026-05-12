@@ -138,7 +138,6 @@ Then it copies only ignored runtime files that are intentionally not committed:
 ```txt
 .env
 .cms.env
-db/dumps/001-arcturus-base.sql, only if present locally
 ```
 
 Then it runs on the VPS:

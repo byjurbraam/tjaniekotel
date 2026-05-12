@@ -103,10 +103,6 @@ function Sync-IgnoredRuntimeFiles {
         Copy-ToServer $CmsEnv "$ProjectDir/.cms.env"
     }
 
-    $BaseSql = Join-Path $Root 'db/dumps/001-arcturus-base.sql'
-    if (Test-Path -LiteralPath $BaseSql) {
-        Copy-ToServer $BaseSql "$ProjectDir/db/dumps/001-arcturus-base.sql"
-    }
 }
 
 function Update-ServerGitCheckout {
